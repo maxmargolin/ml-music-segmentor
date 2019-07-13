@@ -106,3 +106,7 @@ venv.bak/
 .xml
 .iml
 .exe
+*.xml
+/python3/*.mp3
+/.idea/*.iml
+/python3/.idea/*.iml

@@ -8,9 +8,8 @@ import librosa.display
 import matplotlib.pyplot as plt
 import numpy as np
 
-filename = "selena.mp3"
-filename = "et.mp3"
-filename = "hotcold.mp3"
+filename1 = "og.mp3"
+filename = "lyricsl.mp3"
 # 2. Load the audio as a waveform `y`
 #    Store the sampling rate as `sr`
 y, sr = librosa.load(filename)
