@@ -6,8 +6,10 @@ handle downloads
 
 import youtube_dl
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
-VIDEO_ID = "cmSbXsFE3l8"
+DEFALT_VIDEO_ID = "cmSbXsFE3l8"
+
 
 def download_from_url(video_url, filename_of_download):
     """
@@ -36,11 +38,15 @@ def youtube_id_to_url(yt_video_id):
     """
     return 'https://www.youtube.com/watch?v=' + yt_video_id
 
+
 def get_browser():
     """
     :return: a selenium driver
     """
-    return  webdriver.Chrome(executable_path="chromedriver.exe")
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    return webdriver.Chrome(executable_path="chromedriver.exe", options=chrome_options)
+
 
 def browser_url_to_title(driver):
     """
@@ -49,6 +55,7 @@ def browser_url_to_title(driver):
     :return: title of the page, probably the video title
     """
     return driver.title
+
 
 def filter_name(og_title):
     """
@@ -59,10 +66,11 @@ def filter_name(og_title):
 
     # TODO: better cleanup
 
-    song_name =  og_title.split("(")[0]
+    song_name = og_title.split("(")[0]
     whitelist = set('abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789')
     symbolless_title = ''.join(filter(whitelist.__contains__, song_name))
     return symbolless_title
+
 
 def get_current_song_name(driver):
     """
@@ -76,9 +84,10 @@ def get_current_song_name(driver):
     filtered_name = filter_name(full_title)
     return filtered_name
 
-def get_lyrics_url(non_lyrics_url,driver=None):
-    """
 
+def get_lyrics_url(non_lyrics_url, driver=None):
+    """
+    find lyric video for this music video
     :param driver: not required
     :param non_lyrics_url: url of original video
     :return: the url of a video for the same song but with lyrics so it's just talking
@@ -87,17 +96,24 @@ def get_lyrics_url(non_lyrics_url,driver=None):
         driver = get_browser()
     driver.get(non_lyrics_url)
     song_name = get_current_song_name(driver)
-    search_url = "https://www.youtube.com/results?search_query=" + song_name + " lyrics"
+    search_url = "https://www.youtube.com/results?search_query=" + song_name + "  lyrics lyrical words"
     driver.get(search_url)
     driver.find_element_by_id("video-title").click()
     return driver.current_url
 
 
 # get sound files of this and of the lyrical video
+def do_downloads(filename1="og", filename2="lyrical", video_id=DEFALT_VIDEO_ID):
+    """
+    download og and lyrical
+    :param filename1: name to save og , without extension
+    :param filename2: name to save lyrical, without extension
+    :param video_id: <-
+    :return: names of the files
+    """
+    original_video_url = youtube_id_to_url(video_id)
+    download_from_url(original_video_url, filename1)
+    lyrics_video_url = get_lyrics_url(original_video_url)
+    download_from_url(lyrics_video_url, filename2)
 
-original_video_url = youtube_id_to_url(VIDEO_ID)
-download_from_url(original_video_url,"og")
-lyrics_video_url =  get_lyrics_url(original_video_url)
-download_from_url(lyrics_video_url,"lyrical")
-
-
+    return filename1, filename2
